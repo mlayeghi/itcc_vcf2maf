@@ -1,0 +1,8 @@
+{
+  "genome_url": "https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/GRCh38_masked_exclusions_alts_hlas.fasta",
+  "genome_file": "GRCh38_masked_exclusions_alts_hlas.fasta",
+  "vep_cache_url": "https://ftp.ensembl.org/pub/release-104/variation/vep/homo_sapiens_vep_104_GRCh38.tar.gz",
+  "vep_cache_tarfile": "homo_sapiens_vep_104_GRCh38.tar.gz",
+  "vep_species": "homo_sapiens",
+  "vep_version": "104.3"
+}
