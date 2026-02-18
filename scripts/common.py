@@ -5,8 +5,10 @@ import requests
 import shutil
 import subprocess
 import tarfile
+import time
 
 from pathlib import Path
+import urllib.request
 
 
 def ensure_directory(path_str: str) -> Path:
@@ -55,20 +57,22 @@ def ensure_directory(path_str: str) -> Path:
     return path
 
 
-def ensure_reference_data(ref_dir: str, config: dict) -> dict:
+def ensure_reference_data(config: dict) -> dict:
     """
     Ensure reference genome and VEP cache exist inside ref_dir.
+    Base directory within the container will be called /resources.
 
     Returns:
         dict with paths: {"genome": Path, "vep": Path}
     """
 
-    base = Path(ref_dir).expanduser().resolve()
+    base = Path("/resources").expanduser().resolve()
     genome_dir = base / "genome"
 
     # Ensure base exists
     base.mkdir(parents=True, exist_ok=True)
-
+    if not os.path.isdir(base):
+        raise NotADirectoryError(f"resource directory does not exist: {base}")
     if not os.access(base, os.W_OK | os.X_OK):
         raise PermissionError(f"ref_dir not writable: {base}")
 
@@ -90,12 +94,18 @@ def ensure_reference_data(ref_dir: str, config: dict) -> dict:
     vep_dir = base / "vep"
     vep_cache_url = config["vep_cache_url"]
     vep_tar = vep_dir / config["vep_cache_tarfile"]
+    vep_gnomad_vcf_url = config["gnomad_vcf"]
+    vep_gnomad_vcf_tbi_url = config["gnomad_vcf_tbi"]
+    vep_gnomad_vcf = vep_dir / config["gnomad_vcf_file"]
+    vep_gnomad_vcf_tbi = vep_dir /config["gnomad_vcf_tbi_file"]
     vep_sentinel = vep_dir / ".vep_complete"
 
     if vep_sentinel.exists():
         print("VEP cache found. Reusing.")
     else:
         print("VEP cache missing. Downloading...")
+        download_if_needed(url=vep_gnomad_vcf_url, dest=vep_gnomad_vcf)
+        download_if_needed(url=vep_gnomad_vcf_tbi_url, dest=vep_gnomad_vcf_tbi)
         download_if_needed(vep_cache_url, vep_tar)
         with tarfile.open(vep_tar, "r:gz") as tar:
             tar.extractall(path=vep_dir)
@@ -112,26 +122,37 @@ def ensure_reference_data(ref_dir: str, config: dict) -> dict:
 
 
 def download_if_needed(url: str, dest: Path):
+    """
+    Download a file from HTTP, HTTPS, or FTP if it doesn't exist locally.
+    Overwrites if the remote file is newer than local copy.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    headers = {}
+    # Check if file exists and compare last-modified time
     if dest.exists():
-        # Use If-Modified-Since header
-        headers["If-Modified-Since"] = \
-            requests.utils.formatdate(dest.stat().st_mtime, usegmt=True)
-
-    response = requests.get(url, headers=headers, stream=True)
-
-    if response.status_code == 304:
-        print("File is up to date.")
-        return
-
-    response.raise_for_status()
+        try:
+            req = urllib.request.Request(url, method="HEAD")
+            with urllib.request.urlopen(req) as response:
+                remote_mtime = response.headers.get("Last-Modified")
+                if remote_mtime:
+                    # Convert remote Last-Modified to timestamp
+                    remote_ts = time.mktime(
+                        time.strptime(remote_mtime, "%a, %d %b %Y %H:%M:%S %Z")
+                    )
+                    local_ts = dest.stat().st_mtime
+                    if local_ts >= remote_ts:
+                        print("File is up to date.")
+                        return
+        except Exception:
+            # Some FTP servers don’t provide HEAD or Last-Modified
+            pass
 
     tmp_file = dest.with_suffix(".tmp")
+    print(f"Downloading: {url} -> {dest}")
 
-    with tmp_file.open("wb") as f:
-        shutil.copyfileobj(response.raw, f)
+    # Download
+    with urllib.request.urlopen(url) as response, tmp_file.open("wb") as out_file:
+        shutil.copyfileobj(response, out_file)
 
     tmp_file.replace(dest)
     print(f"Downloaded: {dest}")
