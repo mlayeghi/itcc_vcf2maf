@@ -48,3 +48,7 @@ Thumbs.db
 *.mov
 *.wmv
 
+# virtual environment
+venv*/
+test*/
+.python-version
