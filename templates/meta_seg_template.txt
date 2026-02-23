@@ -1,0 +1,6 @@
+cancer_study_identifier: STABLE_ID_PLACEHOLDER
+genetic_alteration_type: COPY_NUMBER_ALTERATION
+datatype: SEG
+data_filename: data_seg.seg
+description: CNA seg
+reference_genome_id: hg38

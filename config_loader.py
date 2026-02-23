@@ -5,7 +5,6 @@ import os
 
 from pathlib import Path
 
-CONFIG: dict = {}
 
 
 def load_config(path: str = "config.json") -> dict:
@@ -16,6 +15,5 @@ def load_config(path: str = "config.json") -> dict:
 
     with config_path.open() as f:
         CONFIG = json.load(f)
-        print(CONFIG.keys())
 
     return CONFIG

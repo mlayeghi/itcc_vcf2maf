@@ -1,0 +1,5 @@
+#Age	Sex	Os Months	Os Status	Patient Id
+#Age at first diagnosis	Sex of the Patient	Overall survival in months	Overall patient survival status	Patient Identifier
+#NUMBER	STRING	NUMBER	STRING	STRING
+#1	1	1	1	1
+AGE	SEX	OS_MONTHS	OS_STATUS	PATIENT_ID

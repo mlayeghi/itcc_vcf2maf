@@ -6,12 +6,13 @@ import sys
 import tempfile
 
 from config_loader import load_config
-from scripts import common
+from pathlib import Path
+from scripts import common, search, cbio_release
 
 repo_dir = os.path.dirname(os.path.realpath(__file__))
+repo_path = Path(repo_dir)
 CONFIG = load_config(path=os.path.join(repo_dir, "config.json"))
 
-print(CONFIG.keys())
 
 def _get_arguments() -> tuple:
     parser = argparse.ArgumentParser(description='ITCC VCF to MAF converter.')
@@ -19,8 +20,8 @@ def _get_arguments() -> tuple:
                         help='The directory to search for vcf and tsv files.',
                         default=os.getcwd(),
                         type=str)
-    parser.add_argument('-r', '--ref_dir', dest="ref_dir",
-                        help="The directory to use or store reference data.",
+    parser.add_argument('-r', '--release_id', dest="release_id",
+                        help='The release id to annotate cbioportal output with.',
                         required=True,
                         type=str)
     parser.add_argument('-t', '--temp', dest="temp_space",
@@ -33,7 +34,6 @@ def _get_arguments() -> tuple:
 
     try:
         data_dir = common.ensure_directory(path_str=args.data_dir)
-        ref_dir = common.ensure_directory(path_str=args.ref_dir)
         # Use user-provided temp space if given, else None
         if args.temp_space:
             temp_space = common.ensure_directory(path_str=args.temp_space)
@@ -56,13 +56,12 @@ def _get_arguments() -> tuple:
         exit(1)
     else:
         print(f"Data directory ready: {data_dir}")
-        print(f"Reference directory ready: {ref_dir}")
 
-    return data_dir, ref_dir, temp_space
+    return data_dir, temp_space, args.release_id, args.dry_run
 
 
 def main():
-    data_dir, ref_dir, temp_space = _get_arguments()
+    data_dir, temp_space, release_id, dry_run = _get_arguments()
 
     tmp_dir_args = {}
     if temp_space:
@@ -71,10 +70,16 @@ def main():
 
     with tempfile.TemporaryDirectory(prefix="itcc_vcf2maf_", **tmp_dir_args) as tmp_dir_name:
         print(f"Created temporary directory: {tmp_dir_name}")
-        ref_dir_dict = common.ensure_reference_data(ref_dir=ref_dir, config=CONFIG)
-        stop = True
-        # short_read.main(this_read1s=args.read1, this_read2s=args.read2, tmp_dir=tmp_dir_name, prefix=args.prefix,
-        #                 token=args.token, email=args.email, save=args.save, om=args.om, v2=args.v2)
+        ref_dir_dict = common.ensure_reference_data(config=CONFIG)
+        maf_files, seg_files = search.searcher(ref_dir_dict=ref_dir_dict, search_dir=data_dir, tmp_dir=tmp_dir_name)
+        cbio_release.make_cbio_release(
+            release_id="release_id",
+            maf_files=maf_files,
+            seg_files=seg_files,
+            templates_dir=repo_path / "templates",
+            clinical_tsv=Path("in_data/clinical/patients_samples.tsv"),
+            output_dir=Path("cbio_release"),
+        )
 
 
 if __name__ == "__main__":
