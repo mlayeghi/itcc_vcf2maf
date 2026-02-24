@@ -15,21 +15,23 @@ CONFIG = load_config(path=os.path.join(repo_dir, "config.json"))
 
 
 def _get_arguments() -> tuple:
-    parser = argparse.ArgumentParser(description='ITCC VCF to MAF converter.')
+    parser = argparse.ArgumentParser(description='ITCC VCF2MAF converter.')
     parser.add_argument('-d', '--dir', dest="data_dir",
                         help='The directory to search for vcf and tsv files.',
                         default=os.getcwd(),
                         type=str)
     parser.add_argument('-r', '--release_id', dest="release_id",
                         help='The release id to annotate cbioportal output with.',
-                        required=True,
+                        required=True, default="test_oncoanalyser",
+                        type=str)
+    parser.add_argument('-p', '--pat_sam', dest="pat_sam",
+                        help='A TSV file with two columns, patient_id and sample_id.',
+                        required=True, default="test_oncoanalyser",
                         type=str)
     parser.add_argument('-t', '--temp', dest="temp_space",
                         help="The temp space to use.",
                         required=False,
                         type=str)
-    parser.add_argument('--dry-run', dest="dry_run", action='store_true',
-                        help="Do not create files.")
     args = parser.parse_args()
 
     try:
@@ -57,11 +59,15 @@ def _get_arguments() -> tuple:
     else:
         print(f"Data directory ready: {data_dir}")
 
-    return data_dir, temp_space, args.release_id, args.dry_run
+    if not os.path.isfile(args.pat_sam):
+        print(f"File does not exist: {str(args.pat_sam)}")
+        exit(1)
+
+    return data_dir, temp_space, args.release_id, args.pat_sam, args.dry_run,
 
 
 def main():
-    data_dir, temp_space, release_id, dry_run = _get_arguments()
+    data_dir, temp_space, release_id, pat_sam, dry_run = _get_arguments()
 
     tmp_dir_args = {}
     if temp_space:
@@ -73,12 +79,12 @@ def main():
         ref_dir_dict = common.ensure_reference_data(config=CONFIG)
         maf_files, seg_files = search.searcher(ref_dir_dict=ref_dir_dict, search_dir=data_dir, tmp_dir=tmp_dir_name)
         cbio_release.make_cbio_release(
-            release_id="release_id",
+            release_id=release_id,
             maf_files=maf_files,
             seg_files=seg_files,
             templates_dir=repo_path / "templates",
-            clinical_tsv=Path("in_data/clinical/patients_samples.tsv"),
-            output_dir=Path("cbio_release"),
+            clinical_tsv=Path(pat_sam),
+            output_dir=Path(os.getcwd()),
         )
 
 

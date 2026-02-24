@@ -120,18 +120,28 @@ def get_sample_ids_from_vcf(infile: Path):
 
 
 def determine_vep_forks(mem_per_fork_gb: int = 18, system_reserve_gb: int = 2, cpu_reserve: int =1) -> str:
+    # --- CPUs ---
     total_cpus = os.cpu_count()
-    total_mem_gb = psutil.virtual_memory().total / (1024**3)
+    slurm_cpus = os.getenv("SLURM_CPUS_PER_TASK")
+    if slurm_cpus:
+        total_cpus = int(slurm_cpus)
 
     max_cpu_forks = max(total_cpus - cpu_reserve, 1)
+
+    # --- Memory ---
+    total_mem_gb = psutil.virtual_memory().total / (1024 ** 3)
+    slurm_mem_node = os.getenv("SLURM_MEM_PER_NODE")
+    if slurm_mem_node:
+        total_mem_gb = int(slurm_mem_node) / 1024
 
     usable_mem = max(total_mem_gb - system_reserve_gb, 0)
     max_mem_forks = math.floor(usable_mem / mem_per_fork_gb)
 
-    forks = min(int(max_cpu_forks), int(max_mem_forks))
+    forks = min(max_cpu_forks, max_mem_forks)
     forks = max(forks, 1)
 
-    print(f"Using {str(forks)} forks")
+    print(f"Detected CPUs={total_cpus}, Mem={total_mem_gb:.1f}GB → Using {forks} forks")
+
     return str(forks)
 
 def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vcf_path: Path,

@@ -144,8 +144,6 @@ def ensure_reference_data(config: dict) -> dict:
     }
 
 
-
-
 def download_if_needed(url: str, dest: Path) -> bool:
     """
     Download a file from HTTP, HTTPS, or FTP if it doesn't exist locally.
