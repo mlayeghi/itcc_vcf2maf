@@ -23,6 +23,7 @@ Compute node requires internet access to download the reference data on first us
 
 ```
 singularity exec \
+-B /path/to/mount/whole/filesystem \
 -B /your/path/to/reference/dir:/resources \
 /path/to/your/singularity/image/cache/itcc_vcf2maf.sif \
 python /opt/itcc_vcf2maf/pedcan_vcf2maf.py -h
