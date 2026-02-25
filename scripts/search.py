@@ -10,7 +10,6 @@ from scripts import purple_cnv2seg, vcf2maf
 def searcher(ref_dir_dict: dict, search_dir: Path, tmp_dir: str) -> tuple:
     maf_files = []
     seg_files = []
-    print(f"In searcher: {str(search_dir)}")
     for root, dirs, files in os.walk(search_dir, topdown=True,followlinks=False):
         root_path = Path(root).expanduser().resolve()
         for file in files:

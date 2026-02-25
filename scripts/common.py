@@ -86,8 +86,6 @@ def ensure_reference_data(config: dict) -> dict:
     """
 
     base = Path("/resources").expanduser().resolve()
-    if sys.platform == "darwin":
-        base = Path("/Users/scottdavidson/Documents/PycharmProjects/itcc_vcf2maf/test_ref_dir").expanduser().resolve()
     genome_dir = base / "genome"
 
     # Ensure base exists
@@ -111,7 +109,7 @@ def ensure_reference_data(config: dict) -> dict:
         print("Reference genome missing. Downloading...")
         download_if_needed(genome_fasta_url, genome_fasta)
         ensure_gatk_reference(ref_fasta=genome_fasta)
-        
+
         genome_sentinel.touch()
         print("Reference genome setup complete.")
 
@@ -162,7 +160,6 @@ def download_if_needed(url: str, dest: Path) -> bool:
     response = requests.get(url, headers=headers, stream=True)
 
     if response.status_code == 304:
-        print("File is up to date.")
         return False
 
     response.raise_for_status()

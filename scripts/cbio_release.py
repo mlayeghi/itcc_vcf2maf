@@ -142,5 +142,3 @@ def make_cbio_release(
     _write_meta_files(release_id, templates_dir, output_dir)
     _write_clinical_files(clinical_tsv, templates_dir, output_dir)
     _write_case_lists(release_id, clinical_tsv, templates_dir, output_dir)
-
-    print("Done!")

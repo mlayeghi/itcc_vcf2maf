@@ -140,8 +140,6 @@ def determine_vep_forks(mem_per_fork_gb: int = 18, system_reserve_gb: int = 2, c
     forks = min(max_cpu_forks, max_mem_forks)
     forks = max(forks, 1)
 
-    print(f"Detected CPUs={total_cpus}, Mem={total_mem_gb:.1f}GB → Using {forks} forks")
-
     return str(forks)
 
 def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vcf_path: Path,
@@ -157,8 +155,6 @@ def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vc
     my_filter_vcf = vep_dir / "af-only-gnomad.hg38.vcf.gz"
     vep_data = vep_dir
     tmp_path = Path(tmp_dir)
-
-    print("Running vcf2maf...", flush=True)
 
     cmd_vcf2maf = [
         "perl", str(vcf2maf_pl),
@@ -182,8 +178,6 @@ def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vc
     # Run vcf2maf.pl
     subprocess.run(cmd_vcf2maf, check=True)
 
-    print("Filtering final MAF...", flush=True)
-
     # filterMaf.pl step: cat outfile | filterMaf.pl > tmp.maf
     filter_maf_path = "/opt/cbioportalize/src/filterMaf.pl"
     tmp_maf = tmp_path / "tmp.maf"
@@ -202,7 +196,6 @@ def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vc
     # Print line count
     with open(outfile, "r") as f:
         n_lines = sum(1 for _ in f)
-    print(f"Final MAF has {n_lines} lines", flush=True)
 
     return outfile
 
@@ -210,23 +203,17 @@ def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vc
 def process_sage(ref_dir_dict: dict, vcf_path: Path, tmp_dir: str) -> Path:
 
     suffix = ".sage.somatic.vcf.gz"
-    print(f"Searching for files with suffix: {suffix}", flush=True)
     if not vcf_path.name.endswith(suffix):
         raise ValueError(f"Unexpected filename: {vcf_path.name}")
 
     ref_fasta = ref_dir_dict["genome"] / CONFIG["genome_fasta_file"]
-    print(f"Using reference fasta: {ref_fasta}", flush=True)
 
     sample = vcf_path.name.removesuffix(suffix)
-    print(f"vcf sample name from file is: {sample}", flush=True)
 
     #Steps
     unzipped_vcf = unzipvcf(vcf_filepath=vcf_path, tmp_dir=tmp_dir)
-    print(f"In steps: unzipped_vcf is {str(unzipped_vcf)}", flush=True)
 
-    filtered_vcf = filter_vcf(ref_fasta=ref_fasta, infile=unzipped_vcf) # uses gatk
-    print(f"In steps: filter_vcf is {str(filtered_vcf)}", flush=True)
-    print(f"Exists? {str(os.path.isfile(filtered_vcf))}", flush=True)
+    filtered_vcf = filter_vcf(ref_fasta=ref_fasta, infile=unzipped_vcf)
 
     normal_id, tumor_id = get_sample_ids_from_vcf(infile=filtered_vcf)
 
