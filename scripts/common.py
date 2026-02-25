@@ -111,6 +111,8 @@ def ensure_reference_data(config: dict) -> dict:
         print("Reference genome missing. Downloading...")
         download_if_needed(genome_fasta_url, genome_fasta)
         ensure_gatk_reference(ref_fasta=genome_fasta)
+        
+        genome_sentinel.touch()
         print("Reference genome setup complete.")
 
     # ---- VEP ----

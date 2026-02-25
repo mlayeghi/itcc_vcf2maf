@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import sys
 import tempfile
 
 from config_loader import load_config
@@ -17,7 +16,8 @@ CONFIG = load_config(path=os.path.join(repo_dir, "config.json"))
 def _get_arguments() -> tuple:
     parser = argparse.ArgumentParser(description='ITCC VCF2MAF converter.')
     parser.add_argument('-d', '--dir', dest="data_dir",
-                        help='The directory to search for vcf and tsv files.',
+                        help='The directory to search for vcf and tsv files. '
+                             'MAF and SEG files will be written beside appropriate files.',
                         default=os.getcwd(),
                         type=str)
     parser.add_argument('-r', '--release_id', dest="release_id",
@@ -32,10 +32,15 @@ def _get_arguments() -> tuple:
                         help="The temp space to use.",
                         required=False,
                         type=str)
+    parser.add_argument('-o', '--out_dir', dest="out_dir",
+                        help='The directory to write output files to.',
+                        default=os.getcwd(),
+                        type=str)
     args = parser.parse_args()
 
     try:
         data_dir = common.ensure_directory(path_str=args.data_dir)
+        out_dir = common.ensure_directory(path_str=args.out_dir)
         # Use user-provided temp space if given, else None
         if args.temp_space:
             temp_space = common.ensure_directory(path_str=args.temp_space)
@@ -63,11 +68,11 @@ def _get_arguments() -> tuple:
         print(f"File does not exist: {str(args.pat_sam)}")
         exit(1)
 
-    return data_dir, temp_space, args.release_id, args.pat_sam, args.dry_run,
+    return data_dir, temp_space, args.release_id, args.pat_sam, out_dir
 
 
 def main():
-    data_dir, temp_space, release_id, pat_sam, dry_run = _get_arguments()
+    data_dir, temp_space, release_id, pat_sam, out_dir = _get_arguments()
 
     tmp_dir_args = {}
     if temp_space:
@@ -84,7 +89,7 @@ def main():
             seg_files=seg_files,
             templates_dir=repo_path / "templates",
             clinical_tsv=Path(pat_sam),
-            output_dir=Path(os.getcwd()),
+            output_dir=Path(out_dir),
         )
 
 

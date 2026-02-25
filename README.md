@@ -6,13 +6,16 @@
 
 ## Requirements
 
-## Minimum Requirements
+Provided in container form, so the ability to run Docker, Singularity or Apptainer is required.
+
+### Minimum System Requirements
 
 - **CPUs:** 16
 - **Memory:** 32 GB RAM
 - **Disk:** 100 GB+ free space
+- **Singularity** or **Docker** or **Apptainer**
 
-Tested on a high performance cluster using slurm scheduler, with these requirements and Singularity/3.11.3.
+Tested on a high performance cluster using slurm scheduler, with these requirements and Singularity version 3.11.3.
 Compute node requires internet access to download the reference data on first use.
 ---
 
@@ -40,13 +43,28 @@ options:
                         The temp space to use.
 ```
 ### Singularity options
-Given here as `/your/path/to/reference/dir`, this will be used to store the reference files required by the pipeline for the run, and future runs if given a non-temporary directory.
+Given here as `/your/path/to/reference/dir`, this will be used to store the reference files and vep database required by the pipeline for the first run, and future runs if given a non-temporary directory.
+```
+Contents of your reference directory will look like this:
+ .
+ |-genome
+ |---GRCh38_masked_exclusions_alts_hlas.dict
+ |---GRCh38_masked_exclusions_alts_hlas.fasta
+ |---GRCh38_masked_exclusions_alts_hlas.fasta.fai
+ |-vep
+ |---af-only-gnomad.hg38.vcf.gz
+ |---af-only-gnomad.hg38.vcf.gz.tbi
+ |---homo_sapiens
+ |-----104_GRCh38
+```
 
 ### pedcan_vcf2maf.py options
 1. The `-t` option allows a user specified temporary directory to be given to allow clean up
 2. The `-d` option provides the directory that you wanted scanned and process for files matching `.purple.cnv.somatic.tsv` or  `.sage.somatic.vcf.gz`.
 2. The `-r` option requests a user specified release id for running the pipeline.
 3. The `-p` option is for the user to provide a TSV file that contains two columns of data with a header line.
+
+Example patient sample tsv file to give with the `-p` flag.
 
 | patient_id | sample_id |
 |------------|-----------|

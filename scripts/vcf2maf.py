@@ -214,7 +214,6 @@ def process_sage(ref_dir_dict: dict, vcf_path: Path, tmp_dir: str) -> Path:
     if not vcf_path.name.endswith(suffix):
         raise ValueError(f"Unexpected filename: {vcf_path.name}")
 
-    # todo: point to the correct fasta within the container
     ref_fasta = ref_dir_dict["genome"] / CONFIG["genome_fasta_file"]
     print(f"Using reference fasta: {ref_fasta}", flush=True)
 
