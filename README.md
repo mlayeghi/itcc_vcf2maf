@@ -58,6 +58,18 @@ Contents of your reference directory will look like this:
  |---homo_sapiens
  |-----104_GRCh38
 ```
+If you don't have access to the internet from the container, you can download and format the resource directory by downloading these files:
+```
+genome directory
+https://pub-cf6ba01919994c3cbd354659947f74d8.r2.dev/genomes/GRCh38_hmf/25.1/GRCh38_masked_exclusions_alts_hlas.fasta
+
+vep directory
+https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/somatic-hg38/af-only-gnomad.hg38.vcf.gz
+https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/somatic-hg38/af-only-gnomad.hg38.vcf.gz.tbi
+https://ftp.ensembl.org/pub/release-104/variation/vep/homo_sapiens_vep_104_GRCh38.tar.gz
+
+tar -xvf homo_sapiens_vep_104_GRCh38.tar.gz
+```
 
 ### pedcan_vcf2maf.py options
 1. The `-t` option allows a user specified temporary directory to be given to allow clean up
