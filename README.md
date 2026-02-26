@@ -15,9 +15,9 @@ Provided in container form, so the ability to run Docker, Singularity or Apptain
 - **Disk:** 100 GB+ free space
 - **Singularity** or **Docker** or **Apptainer**
 
-
 Tested on a high performance cluster using slurm scheduler, with these requirements and Singularity version 3.11.3.
 Compute node requires internet access to download the reference data on first use.
+
 ---
 
 ## Usage
