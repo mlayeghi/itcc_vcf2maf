@@ -20,12 +20,13 @@ Compute node requires internet access to download the reference data on first us
 ---
 
 ## Usage
-
+The container can be pulled from [Dockerhub](https://hub.docker.com/r/shlienteam/itcc_vcf2maf).
 ```
+singularity pull itcc_vcf2maf_1_0_0.sif docker://shlienteam/itcc_vcf2maf:1.0.0
 singularity exec \
 -B /path/to/mount/whole/filesystem \
 -B /your/path/to/reference/dir:/resources \
-/path/to/your/singularity/image/cache/itcc_vcf2maf.sif \
+/path/to/your/singularity/image/cache/itcc_vcf2maf_1_0_0.sif \
 python /opt/itcc_vcf2maf/pedcan_vcf2maf.py -h
 
 usage: pedcan_vcf2maf.py [-h] [-d DATA_DIR] -r RELEASE_ID -p PAT_SAM [-t TEMP_SPACE] [--dry-run]
@@ -90,7 +91,7 @@ Example patient sample tsv file to give with the `-p` flag.
 
 ```
 singularity exec -e -B /your/path/to/reference/dir:/resources \
-/path/to/your/singularity/image/cache/itcc_vcf2maf.sif \
+/path/to/your/singularity/image/cache/itcc_vcf2maf_1_0_0.sif \
 python /opt/itcc_vcf2maf/pedcan_vcf2maf.py \
 -d /your/path/to/data/dir \
 -p /your/path/to/pat_sam.tsv \
