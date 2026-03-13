@@ -22,9 +22,9 @@ def searcher(ref_dir_dict: dict, search_dir: Path, tmp_dir: str) -> tuple:
                 this_seq_file = purple_cnv2seg.process_purple(tsv_file=file_path)
                 seg_files.append(this_seq_file)
 
-            if file.endswith(".sage.somatic.vcf.gz"):
-                print(f"About to process sage: {str(search_dir)}")
-                this_maf_file = vcf2maf.process_sage(ref_dir_dict=ref_dir_dict, vcf_path=file_path, tmp_dir=tmp_dir)
+            if file.endswith(".purple.somatic.vcf.gz"):
+                print(f"About to process vcf: {str(search_dir)}")
+                this_maf_file = vcf2maf.process_vcf(ref_dir_dict=ref_dir_dict, vcf_path=file_path, tmp_dir=tmp_dir)
                 maf_files.append(this_maf_file)
 
     return maf_files, seg_files

@@ -52,7 +52,7 @@ def unzipvcf(vcf_filepath: Path, tmp_dir: str) -> Path:
 
 def filter_vcf(ref_fasta: Path, infile: Path) -> Path:
     filtered_vcf = infile.with_name(infile.stem + "_PASS.vcf")
-    print(f"Filtering PASS variants...", flush=True)
+    print("Filtering PASS variants...", flush=True)
 
     cmd = [
         "gatk",
@@ -196,19 +196,18 @@ def run_vcf_2_maf_perl(ref_fasta: Path, vep_dir: Path, filtered_vcf: Path, og_vc
     # Print line count
     with open(outfile, "r") as f:
         n_lines = sum(1 for _ in f)
+        print(f"Line count = {str(n_lines)}")
 
     return outfile
 
 
-def process_sage(ref_dir_dict: dict, vcf_path: Path, tmp_dir: str) -> Path:
+def process_vcf(ref_dir_dict: dict, vcf_path: Path, tmp_dir: str) -> Path:
 
-    suffix = ".sage.somatic.vcf.gz"
+    suffix = ".purple.somatic.vcf.gz"
     if not vcf_path.name.endswith(suffix):
         raise ValueError(f"Unexpected filename: {vcf_path.name}")
 
     ref_fasta = ref_dir_dict["genome"] / CONFIG["genome_fasta_file"]
-
-    sample = vcf_path.name.removesuffix(suffix)
 
     #Steps
     unzipped_vcf = unzipvcf(vcf_filepath=vcf_path, tmp_dir=tmp_dir)
