@@ -13,7 +13,7 @@ def searcher(ref_dir_dict: dict, search_dir: Path, tmp_dir: str) -> tuple:
     for root, dirs, files in os.walk(search_dir, topdown=True,followlinks=False):
         root_path = Path(root).expanduser().resolve()
         for file in files:
-            if not file.endswith((".purple.cnv.somatic.tsv", ".sage.somatic.vcf.gz")):
+            if not file.endswith((".purple.cnv.somatic.tsv", "purple.somatic.vcf.gz")):
                 continue
             # So we have one of two required types
             file_path = root_path / file
