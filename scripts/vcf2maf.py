@@ -78,7 +78,26 @@ def filter_vcf(ref_fasta: Path, infile: Path) -> Path:
     return filtered_vcf
 
 
-def get_sample_ids_from_vcf(infile: Path):
+def get_tumor_id_from_filename(vcf_path: Path) -> str:
+    suffix = ".purple.somatic.vcf.gz"
+    if not vcf_path.name.endswith(suffix):
+        raise ValueError(
+            f"Unexpected filename: {vcf_path.name}\n"
+            f"VCF files must end with {suffix}"
+        )
+
+    tumor_id = vcf_path.name.removesuffix(suffix)
+    if not tumor_id:
+        raise ValueError(
+            f"Could not determine tumor sample ID from filename: {vcf_path.name}\n"
+            f"VCF files should be named as <tumor_sample_id>{suffix}, where "
+            f"the tumor sample ID matches one of the VCF sample columns."
+        )
+
+    return tumor_id
+
+
+def get_sample_ids_from_vcf(infile: Path, tumor_id: str):
     """
     Extract normal and tumor sample IDs from a VCF file.
 
@@ -86,13 +105,16 @@ def get_sample_ids_from_vcf(infile: Path):
     ----------
     infile : Path
         Path to the VCF file (plain text, already unzipped).
+    tumor_id : str
+        Tumor sample ID derived from the original VCF filename.
+        Expected to match one of the two VCF sample columns.
 
     Returns
     -------
     normal_id : str
-        Normal sample ID (second-to-last column)
+        Normal sample ID (the sample column that's not the tumor ID; fallback: second-to-last column)
     tumor_id : str
-        Tumor sample ID (last column)
+        Tumor sample ID (the sample column that matches the input tumor_id; fallback: last column)
     """
     # Open file and read line by line
     with open(infile, "rt", encoding="utf-8", errors="strict") as f:
@@ -107,8 +129,30 @@ def get_sample_ids_from_vcf(infile: Path):
                     raise ValueError(f"Wrong number of columns in VCF file: {infile}")
 
                 # Extract sample IDs
-                normal_id = columns[-2]  # second-to-last column
-                tumor_id = columns[-1]  # last column
+                sample_ids = columns[-2:]
+                if tumor_id not in sample_ids:
+                    normal_id = sample_ids[0]  # second-to-last column
+                    tumor_id = sample_ids[1]   # last column
+                    print(
+                        f"WARNING: Tumor sample ID from filename was not found in VCF sample columns. "
+                        f"Falling back to the original column-order assumption: among the final two "
+                        f"VCF sample columns, the second-to-last column is normal ({normal_id}) and "
+                        f"the last column is tumor ({tumor_id}). VCF sample columns: {', '.join(sample_ids)}",
+                        flush=True,
+                    )
+                    return normal_id, tumor_id
+
+                normal_candidates = [sample_id for sample_id in sample_ids if sample_id != tumor_id]
+                if len(normal_candidates) != 1:
+                    raise ValueError(
+                        f"Could not determine normal sample ID from VCF sample columns: "
+                        f"{', '.join(sample_ids)}\n"
+                        f"Expected exactly two VCF sample columns: one matching the tumour sample ID "
+                        f"from the filename ({tumor_id}) and one normal sample column. Please check "
+                        f"whether the VCF has duplicate sample IDs or more than two sample columns."
+                    )
+
+                normal_id = normal_candidates[0]
 
                 print(f"Found normal sample: {normal_id}", flush=True)
                 print(f"Found tumor sample: {tumor_id}", flush=True)
@@ -205,7 +249,10 @@ def process_vcf(ref_dir_dict: dict, vcf_path: Path, tmp_dir: str) -> Path:
 
     suffix = ".purple.somatic.vcf.gz"
     if not vcf_path.name.endswith(suffix):
-        raise ValueError(f"Unexpected filename: {vcf_path.name}")
+        raise ValueError(
+            f"Unexpected filename: {vcf_path.name}\n"
+            f"VCF files must end with {suffix}"
+        )
 
     ref_fasta = ref_dir_dict["genome"] / CONFIG["genome_fasta_file"]
 
@@ -214,7 +261,8 @@ def process_vcf(ref_dir_dict: dict, vcf_path: Path, tmp_dir: str) -> Path:
 
     filtered_vcf = filter_vcf(ref_fasta=ref_fasta, infile=unzipped_vcf)
 
-    normal_id, tumor_id = get_sample_ids_from_vcf(infile=filtered_vcf)
+    tumor_id = get_tumor_id_from_filename(vcf_path=vcf_path)
+    normal_id, tumor_id = get_sample_ids_from_vcf(infile=filtered_vcf, tumor_id=tumor_id)
 
     out_maf_file = run_vcf_2_maf_perl(ref_fasta=ref_fasta, vep_dir=ref_dir_dict["vep"], filtered_vcf=filtered_vcf,
                                       og_vcf_path=vcf_path, normal_id=normal_id, tumour_id=tumor_id, tmp_dir=tmp_dir)
