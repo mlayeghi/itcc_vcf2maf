@@ -19,7 +19,7 @@ def searcher(ref_dir_dict: dict, search_dir: Path, tmp_dir: str) -> tuple:
             file_path = root_path / file
             if file.endswith(".purple.cnv.somatic.tsv"):
                 print(f"About to process purple: {str(search_dir)}")
-                this_seq_file = purple_cnv2seg.process_purple(tsv_file=file_path)
+                this_seq_file = purple_cnv2seg.process_purple(tsv_file=file_path, tmp_space=tmp_dir)
                 seg_files.append(this_seq_file)
 
             if file.endswith(".purple.somatic.vcf.gz"):

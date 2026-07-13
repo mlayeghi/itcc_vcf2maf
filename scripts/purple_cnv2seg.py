@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-
+import os
 import numpy as np
 import pandas as pd
 
 from pathlib import Path
 
 
-def process_purple(tsv_file: Path) -> Path:
+def process_purple(tsv_file: Path, tmp_space: str) -> Path:
     # Derive output path and sample name
     suffix = ".purple.cnv.somatic.tsv"
     if not tsv_file.name.endswith(suffix):
         raise ValueError(f"Unexpected filename: {tsv_file.name}")
 
     sample = tsv_file.name.removesuffix(suffix)
-    output_path = tsv_file.parent / f"{sample}.seg"
+    output_path = os.path.join(tmp_space, f"{sample}.seg")
 
     # Load the TSV
     df = pd.read_csv(filepath_or_buffer=tsv_file, sep="\t")
