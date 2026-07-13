@@ -38,8 +38,8 @@ RUN curl -sL https://repo.anaconda.com/miniconda/Miniconda3-${MINICONDA_VERSION}
 ENV PATH="/opt/conda/bin:${PATH}"
 
 COPY pedcan_vcf2maf.py /opt/itcc_vcf2maf/
-COPY run_vcf2maf.py.py /opt/itcc_vcf2maf/
-COPY run_cnv2seg.py.py /opt/itcc_vcf2maf/
+COPY run_vcf2maf.py /opt/itcc_vcf2maf/
+COPY run_cnv2seg.py /opt/itcc_vcf2maf/
 COPY config_loader.py /opt/itcc_vcf2maf/
 COPY config.json /opt/itcc_vcf2maf/
 COPY make_cbio_release.sh /opt/itcc_vcf2maf/
