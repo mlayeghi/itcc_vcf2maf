@@ -15,7 +15,8 @@ def _merge_maf(maf_files: list[Path], output_file: Path) -> None:
 
         # Append remaining lines from all files
         for maf in maf_files:
-            with maf.open() as f:
+            maf_path = Path(maf)
+            with maf_path.open() as f:
                 for i, line in enumerate(f):
                     if i >= no_header_lines:
                         out.write(line)
@@ -28,7 +29,8 @@ def _merge_seg(seg_files: list[Path], output_file: Path) -> None:
         out.write("ID\tchrom\tloc.start\tloc.end\tnum.mark\tseg.mean\n")
 
         for seg in seg_files:
-            with seg.open() as f:
+            seg_path = Path(seg)
+            with seg_path.open() as f:
                 for i, line in enumerate(f):
                     if i >= no_header_lines:
                         out.write(line)
