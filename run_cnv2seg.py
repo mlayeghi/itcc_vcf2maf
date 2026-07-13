@@ -73,7 +73,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="itcc_vcf2maf_", **tmp_dir_args) as tmp_dir_name:
         print(f"Created temporary directory: {tmp_dir_name}")
         ref_dir_dict = common.ensure_reference_data(config=CONFIG)
-        maf_files, seg_files = search.searcher(ref_dir_dict=ref_dir_dict, search_dir=data_dir, tmp_dir=tmp_dir_name)
+        maf_files, seg_files = search.searcher(ref_dir_dict=ref_dir_dict, search_dir=data_dir, tmp_dir=tmp_dir_name, out_type='seg')
 
         print(f"Processing {len(seg_files)} SEG files...")
         cbio_release._merge_seg(seg_files, output_dir / "data_seg.seg")
