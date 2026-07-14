@@ -105,5 +105,5 @@ python /opt/itcc_vcf2maf/pedcan_vcf2maf.py \
 
 ```
 Contact:
-- Scott Davidson <scott.davidson@sickkids.ca>
+- Mehdi Layeghifard <mehdi.layeghifard@sickkids.ca>
 ```
